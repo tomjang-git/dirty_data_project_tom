@@ -1,0 +1,561 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+decathlon <-
+read_rds("dirty_data_project_raw_data/decathlon.rds")
+```
+
+
+
+```{r}
+decathlon
+```
+
+
+
+```{r}
+dog <-
+read_csv("dirty_data_project_raw_data/dog_survey.csv")
+```
+
+
+```{r}
+decathlon %>% 
+  names()
+```
+
+
+```{r}
+decathlon <- decathlon %>% 
+  rownames_to_column(var = "name")
+```
+
+
+```{r}
+sum(is.na(decathlon))
+```
+
+
+```{r}
+decathlon
+```
+```{r}
+decathlon %>% 
+colnames()
+```
+
+```{r}
+decathlon_rearranged <- decathlon[c("Competition", "Rank", "name", "Points", "100m", "400m", "1500m", "110m.hurdle", "Long.jump", "High.jump", "Pole.vault" , "Javeline", "Shot.put", "Discus" )]
+```
+
+
+```{r}
+decathlon_rearranged
+```
+```{r}
+library(tools)
+```
+
+
+```{r}
+decathlon_rearranged_case$name <- tolower(decathlon_rearranged[["name"]])
+```
+
+
+```{r}
+decathlon_rearranged_case<-
+decathlon_rearranged %>% 
+  mutate(name = str_to_title(name))
+```
+
+
+```{r}
+decathlon_rearranged_case
+```
+
+```{r}
+library(snakecase)
+```
+
+decathlon_rearranged <- decathlon[c("Competition", "Rank", "name", "Points", "100m", "400m", "1500m", "110m.hurdle", "Long.jump", "High.jump", "Pole.vault" , "Javeline", "Shot.put", "Discus" )]
+
+
+
+```{r}
+decathlon_rearranged_snakecase <- 
+  decathlon_rearranged_case %>% 
+  rename(
+    competition = Competition,
+    rank = Rank,
+    points = Points,
+    "110m_hurdle" = "110m.hurdle",
+    long_jump = Long.jump,
+    high_jump = High.jump,
+    pole_vault = Pole.vault,
+    javeline = Javeline,
+    shot_put = Shot.put,
+    discus = Discus
+    )
+decathlon_rearranged_snakecase
+```
+
+
+```{r}
+max(decathlon_clean$long_jump)
+```
+
+
+
+```{r}
+arrange(decathlon_clean, desc(long_jump)) %>% 
+  head(1)
+```
+
+
+
+```{r}
+decathlon_clean %>% 
+  summarise(average_100 = mean
+            (filter(decathlon_clean, competition == "Decastar")
+              $"100m", na.rm = TRUE))
+```
+
+```{r}
+decathlon_clean %>% 
+  summarise(average_100_Decastar = mean(filter(decathlon_clean, competition == "Decastar")
+                                        $"100m", na.rm = TRUE)
+            )
+decathlon_clean %>% 
+  summarise(average_100_OlympicG = mean(filter(decathlon_clean, competition == "OlympicG")
+                                        $"100m", na.rm = TRUE)
+            )
+```
+
+
+
+```{r}
+decathlon_clean %>% 
+  group_by(name) %>% 
+  summarise(overall_points = (sum(points))) %>% 
+  arrange(desc(overall_points))
+```
+
+
+
+
+```{r}
+decathlon_clean %>% 
+  select(competition, name, rank, shot_put) %>% 
+  filter(competition == "Decastar") %>%
+  arrange(desc(shot_put)) %>% 
+  head(3)
+
+decathlon_clean %>% 
+  select(competition, name, rank, shot_put) %>% 
+  filter(competition == "OlympicG") %>%
+  arrange(desc(shot_put)) %>% 
+  head(3)
+
+```
+
+```{r}
+decathlon_clean %>% 
+  mean(filter("400m" <= 50)$400m, na.rm = TRUE)
+```
+
+```{r}
+library(janitor)
+```
+
+
+```{r}
+decathlon_clean <- clean_names(decathlon_clean)
+```
+
+```{r}
+decathlon_clean %>% 
+  summarise(more_than_50 = 
+              mean(
+                filter(
+                  decathlon_clean, x400m >= 50)$x400m, na.rm = TRUE))
+
+decathlon_clean %>% 
+  summarise(less_than_50 = 
+              mean(
+                filter(
+                  decathlon_clean, x400m <= 50)$x400m, na.rm = TRUE))
+
+
+```
+
+
+
+
+  summarise(average_100 = mean(filter(decathlon_clean, competition == "Decastar")$"100m", na.rm = TRUE))
+
+
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
