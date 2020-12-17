@@ -10,47 +10,41 @@ library(tidyverse)
 ```
 
 ```{r}
+library(tools)
+```
+
+```{r}
+library(janitor)
+```
+
+```{r}
 decathlon <-
 read_rds("dirty_data_project_raw_data/decathlon.rds")
 ```
 
-
-
-```{r}
-decathlon
-```
-
-
-
-```{r}
-dog <-
-read_csv("dirty_data_project_raw_data/dog_survey.csv")
-```
-
-
+#just having a look at the data
 ```{r}
 decathlon %>% 
   names()
 ```
 
-
+#placing athlete names in new column, away from inherent row name
 ```{r}
 decathlon <- decathlon %>% 
   rownames_to_column(var = "name")
 ```
 
-
+#seeing if there are any NA values to worry about. None.
 ```{r}
 sum(is.na(decathlon))
 ```
 
+#getting a list of all of the column names in one place, so i don't have to refer back to a table for the rearranging that's about to be done.
+#rearranging columns for a more organised reading. Basic details of competition, rank, name, and points first. Followed by the runs. Followed by jumps. Followed by throws.
 
-```{r}
-decathlon
-```
 ```{r}
 decathlon %>% 
-colnames()
+  colnames()
 ```
 
 ```{r}
@@ -59,98 +53,59 @@ decathlon_rearranged <- decathlon[c("Competition", "Rank", "name", "Points", "10
 
 
 ```{r}
+decathlon_rearranged <- clean_names(decathlon_rearranged)
 decathlon_rearranged
 ```
+
+
+#changing the athlete names from all-caps to title. Assigning to new dataframe because I think the data is looking clean now.
 ```{r}
-library(tools)
-```
-
-
-```{r}
-decathlon_rearranged_case$name <- tolower(decathlon_rearranged[["name"]])
-```
-
-
-```{r}
-decathlon_rearranged_case<-
+decathlon_clean <-
 decathlon_rearranged %>% 
   mutate(name = str_to_title(name))
+decathlon_clean
 ```
+#1.1.2.1
 
-
-```{r}
-decathlon_rearranged_case
-```
-
-```{r}
-library(snakecase)
-```
-
-decathlon_rearranged <- decathlon[c("Competition", "Rank", "name", "Points", "100m", "400m", "1500m", "110m.hurdle", "Long.jump", "High.jump", "Pole.vault" , "Javeline", "Shot.put", "Discus" )]
-
-
-
-```{r}
-decathlon_rearranged_snakecase <- 
-  decathlon_rearranged_case %>% 
-  rename(
-    competition = Competition,
-    rank = Rank,
-    points = Points,
-    "110m_hurdle" = "110m.hurdle",
-    long_jump = Long.jump,
-    high_jump = High.jump,
-    pole_vault = Pole.vault,
-    javeline = Javeline,
-    shot_put = Shot.put,
-    discus = Discus
-    )
-decathlon_rearranged_snakecase
-```
-
-
+#checking the number for highest long jump number
 ```{r}
 max(decathlon_clean$long_jump)
 ```
 
-
-
+#pulling up all details of the highest long jump. Matches with number above.
 ```{r}
 arrange(decathlon_clean, desc(long_jump)) %>% 
   head(1)
 ```
 
+#1.1.2.2
 
-
-```{r}
-decathlon_clean %>% 
-  summarise(average_100 = mean
-            (filter(decathlon_clean, competition == "Decastar")
-              $"100m", na.rm = TRUE))
-```
-
+#summarising the average of the competition column when it's been filtered down to each competition
 ```{r}
 decathlon_clean %>% 
   summarise(average_100_Decastar = mean(filter(decathlon_clean, competition == "Decastar")
-                                        $"100m", na.rm = TRUE)
+                                        $x100m, na.rm = TRUE)
             )
 decathlon_clean %>% 
   summarise(average_100_OlympicG = mean(filter(decathlon_clean, competition == "OlympicG")
-                                        $"100m", na.rm = TRUE)
+                                        $x100m, na.rm = TRUE)
             )
 ```
 
 
+#1.1.2.3
 
 ```{r}
 decathlon_clean %>% 
   group_by(name) %>% 
   summarise(overall_points = (sum(points))) %>% 
-  arrange(desc(overall_points))
+  arrange(desc(overall_points)) %>% 
+  head(1)
 ```
 
 
 
+#1.1.2.4
 
 ```{r}
 decathlon_clean %>% 
@@ -167,20 +122,7 @@ decathlon_clean %>%
 
 ```
 
-```{r}
-decathlon_clean %>% 
-  mean(filter("400m" <= 50)$400m, na.rm = TRUE)
-```
-
-```{r}
-library(janitor)
-```
-
-
-```{r}
-decathlon_clean <- clean_names(decathlon_clean)
-```
-
+#1.1.2.5
 ```{r}
 decathlon_clean %>% 
   summarise(more_than_50 = 

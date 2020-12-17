@@ -1,0 +1,502 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#How I'm going to clean the data:
+#1. Parse anything from the datasets that isn't pertinent to the subsequent analysis. This will involve parsing out the Degrees of Separation questions and the other random questions. Keeping gender, age, country etc because those are asked about.
+#2. Pivot the DFs to longform, so that there is only one column for candy and one for the participant's rating
+#3. Change the column names that have corresponding data in other DFs, and clean up the values within them. Specifically Countries and States.
+#4. Merge the three DFs.
+
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(readxl)
+```
+
+```{r}
+library(janitor)
+```
+
+```{r}
+library(tidyr)
+```
+
+#CLEANING
+
+#reading in the three DFs
+```{r}
+candy_2015 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx")
+candy_2016 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx")
+candy_2017 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx")
+```
+
+#cleaning the names and assigning to new variables
+```{r}
+candy_2015 <- clean_names(candy_2015)
+candy_2016 <- clean_names(candy_2016)
+candy_2017 <- clean_names(candy_2017)
+```
+
+
+
+
+#giving year and id to each DF, but maybe not needed?
+
+
+#5630 obvs for 2015
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  mutate(id = 1:5630) %>% 
+  relocate("id", .before = 1) %>% 
+  mutate(year = 2015)
+```
+
+
+#1259 obvs for 2016
+```{r}
+candy_2016 <-
+candy_2016 %>%
+  mutate(id = 5631:6889) %>% 
+  relocate("id", .before = 1) %>% 
+  mutate(year = 2016)
+```
+
+
+#2460 obvs for 2017
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  mutate(id = 6890:9349) %>% 
+  relocate("id", .before = 1) %>% 
+  mutate(year = 2017)
+```
+
+
+#renaming the age value so there's something to bind all three dfs to
+
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  rename(age = how_old_are_you)
+```
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(age = how_old_are_you)
+```
+
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  rename(age = q3_age)
+```
+
+
+#renaming the going out columns in 15/16
+
+
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  rename(going_out = are_you_going_actually_going_trick_or_treating_yourself)
+```
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(going_out = are_you_going_actually_going_trick_or_treating_yourself)
+```
+
+#renaming country and state columns in 2016 and 2017
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(state_province_county_etc = which_state_province_county_do_you_live_in) %>% 
+  rename(country = which_country_do_you_live_in)
+```
+
+
+
+
+
+#dropping rows if there is no candy or trick/treat information 
+
+```{r}
+#candy_2015 %>% 
+  #filter(!is.na(going_out) & !is.na(c(x100_grand_bar:york_peppermint_patties))
+```
+#what's wrong with this? Why does it work when I don't include the colon and following bit? Tried quotation marks, adding C to make it a vector, nothing. 
+
+
+
+#necessary for the analysis: CANDY    YEAR    AGE   TRICK OR TREATING   GENDER    COUNTRY
+#kill everything else
+
+
+#pivoting 2015, rearranging  position of columns
+```{r}
+candy_2015_long <-
+candy_2015 %>% 
+  pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties", butterfinger, sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year, necco_wafers),
+               names_to = "candy",
+               values_to = "rating")
+```
+
+```{r}
+candy_2015_long %>% 
+  names()
+```
+
+```{r}
+candy_2015_long <-
+candy_2015_long %>% 
+  select("id":"going_out", candy, rating, year) %>% 
+  relocate(year, id, age, candy, rating, going_out, timestamp)
+```
+
+#2015 looking ok for now. Onto 2016
+
+```{r}
+candy_2016_long %>% 
+  names()
+```
+
+
+
+```{r}
+candy_2016_long <-
+candy_2016 %>% 
+  pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties"),
+               names_to = "candy",
+               values_to = "rating")
+
+```
+
+
+#need to figure out way to assign all of the specific items listed into the "CANDY" column and give them a value of JOY (and DESPAIR for the corresponding column)
+```{r}
+#candy_2016_long_trial <-
+#candy_2016_long %>% 
+ # pivot_longer(cols = please_list_any_items_not_included_above_that_give_you_joy,
+      #         values_to = "candy")
+
+#And after sending the values to candy, automatically filling the rating column with "joy"
+```
+
+
+```{r}
+candy_2016_long <-
+candy_2016_long %>% 
+  select("id":"state_province_county_etc", candy, rating, year) %>% 
+  relocate(year, id, age, your_gender, country, state_province_county_etc, candy, rating, going_out, timestamp)
+```
+#2016 looking ok. Need to figure out a way to assign specific items to JOY and DESPAIR columns. ASK INSTRUCTORS TMR
+#_______________________________________________________________________________-
+
+#find a better way of cleaning up the "Q" thing below
+
+```{r}
+names(candy_2017) <- sub("q1_", "", names(candy_2017))
+names(candy_2017) <- sub("q2_", "", names(candy_2017))
+names(candy_2017) <- sub("q3_", "", names(candy_2017))
+names(candy_2017) <- sub("q4_", "", names(candy_2017))
+names(candy_2017) <- sub("q5_", "", names(candy_2017))
+names(candy_2017) <- sub("q6_", "", names(candy_2017))
+names(candy_2017) <- sub("q7_", "", names(candy_2017))
+names(candy_2017) <- sub("q8_", "", names(candy_2017))
+names(candy_2017) <- sub("q9_", "", names(candy_2017))
+names(candy_2017) <- sub("q10_", "", names(candy_2017))
+names(candy_2017) <- sub("q11_", "", names(candy_2017))
+names(candy_2017) <- sub("q12_", "", names(candy_2017))
+names(candy_2017) <- sub("q13_", "", names(candy_2017))
+```
+
+
+#originally had letter q in front of it, now needs an x
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  rename(x100_grand_bar = "100_grand_bar")
+```
+
+
+
+
+
+
+```{r}
+candy_2017_long <-
+candy_2017 %>% 
+  pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties"),
+               names_to = "candy",
+               values_to = "rating")
+
+```
+
+
+```{r}
+candy_2017_long <-
+candy_2017_long %>% 
+  select("id":"state_province_county_etc", candy, rating, year) %>% 
+  relocate(year, id, age, gender, country, state_province_county_etc, candy, rating, going_out)
+```
+
+
+```{r}
+compare_df_cols(candy_2015_long, candy_2016_long, candy_2017_long)
+```
+
+
+#all three DFs look ok for now. Time to bind them.
+
+```{r}
+candy_bind <-
+  bind_rows(candy_2015_long, candy_2016_long, candy_2017_long)
+candy_bind
+```
+
+#get rid of rows that have no rating value and no going out value
+
+#originally tried this line of code but it cut out too much, removed all rows which had an NA value in going_out or rating. Logically the statement reads "show results if it is NOT the case that going_out is NA, and filter results if it is NOT the case that rating is NA. Many rows could have an NA value in one but not the other, and still get filtered out. This isn't what I want.
+```{r}
+candy_bind %>% 
+  filter(!is.na(going_out) & !is.na(rating))
+```
+
+#this one reads "show results if it is NOT the case that BOTH going_out and rating are NA. There are fewer results where this is the case. 
+```{r}
+candy_bind_filtered <-
+candy_bind %>% 
+  filter(!(is.na(going_out) & is.na(rating)))
+candy_bind_filtered
+```
+
+
+```{r}
+unique(candy_bind_filtered["candy"]) %>% 
+  order_by(as.character())
+```
+
+
+
+```{r}
+candy_bind_filtered %>%  
+  str_sub(
+    "mary_janes", "anonymous_brown_globs_that_come_in_black_and_orange_wrappers")
+```
+
+
+
+
+#QUESTIONS
+
+
+#1.4.2.1
+#What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+
+
+```{r}
+candy_bind_filtered %>% 
+  count(is.na(rating))
+```
+#^^^rename values and column names and we're golden.
+
+```{r}
+candy_bind_filtered %>% 
+  count(is.na(rating))
+```
+
+
+
+
+#1.4.2.2
+
+#need to make sure there are no characters in the AGE column. And then one of the chunks directly below may work.
+
+
+```{r}
+candy_bind_filtered %>% 
+  group_by(going_out) %>% 
+  summarise(average_age = mean(age, na.rm = TRUE))
+```
+
+```{r}
+candy_bind_filtered %>% 
+  summarise(average_age_not = mean(agefilter(candy_bind_filtered, going_out == "Yes"), na.rm = TRUE))
+```
+
+```{r}
+candy_bind_filtered %>% 
+  mean(filter(candy_bind_filtered, going_out == "Yes")$age, na.rm = TRUE)
+```
+
+```{r}
+candy_bind_filtered_age %>% 
+  filter(going_out == "Yes") %>% 
+  summarise(average_age = mean(age, na.rm = TRUE))
+```
+#______________________________________________________________________
+
+```{r}
+minmaxvector <- c(2, 120)
+```
+
+```{r}
+candy_bind_filtered_age <-
+  candy_bind_filtered %>%
+  mutate(age = str_extract(age, "^[0-9]*+")) %>% 
+    replace_with_na(replace = list(age = c(1880))
+```
+
+```{r}
+library(naniar)
+```
+
+```{r}
+candy_bind_filtered_age %>% 
+  distinct(age)
+```
+
+
+```{r}
+  candy_bind_filtered %>%
+
+```
+
+```{r}
+candy_bind_filtered_age
+```
+
+
+```{r}
+candy_bind_filtered_age %>% 
+  distinct(age)
+```
+
+
+yyz$b <- as.numeric(as.character(yyz$b))
+
+```{r}
+candy_bind_filtered_age$age <-
+  as.numeric(as.character(candy_bind_filtered_age$age))
+```
+
+
+
+
+```{r}
+candy_bind_filtered_age <-
+candy_bind_filtered %>% 
+  mutate(age = str_sub(age, "a-z"))
+```
+
+
+```{r}
+(candy_bind_filtered) <- str_sub("a", "", names(candy_bind_filtered))
+
+```
+
+
+
+```{r}
+candy_bind_filtered_age %>% 
+  distinct(candy)
+```
+
+
+```{r}
+candy_bind_filtered %>% 
+distinct(age)
+```
+
+
+names(candy_2017) <- sub("q1_", "", names(candy_2017))
+
+
+
+
+decathlon_clean %>% 
+  summarise(average_100_Decastar = mean(filter(decathlon_clean, competition == "Decastar")
+                                        $x100m, na.rm = TRUE)
+
+
+
+
+
+
+decathlon_clean %>% 
+  group_by(name) %>% 
+  summarise(overall_points = (sum(points))) %>% 
+  arrange(desc(overall_points)) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#can I find a way to get rid of rows with all NAs for candy before pivoting it longer
+
+
+
+
+
+
+
+
+1.4 Task 4 - Halloween Candy Data
+The data is in files boing-boing-candy-2015.xlxs, boing-boing-candy-2016.xlxs and boing-boing-candy-2017.xlxs. Bear in mind that this is trickier compared with tasks 1, 2 & 3.
+
+More information on this data is available here
+
+1.4.1 Some cleaning hints
+
+You’ll need to combine these three datasets together.
+The column country is particularly messy, you will likely need to do some ‘hard coding’ here!
+
+1.4.2 Analysis questions
+
+What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+What was the average age of people who are going out trick or treating and the average age of people 3. not going trick or treating?
+For each of joy, despair and meh, which candy bar revived the most of these ratings?
+How many people rated Starburst as despair?
+For the next three questions, count despair as -1, joy as +1 and meh as 0.
+
+What was the most popular candy bar by this rating system for each gender in the dataset?
+What was the most popular candy bar in each year?
+What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,478 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+library(readxl)
+```
+
+```{r}
+library(janitor)
+```
+
+```{r}
+library(tidyr)
+```
+
+
+
+#reading in the three DFs
+```{r}
+candy_2015 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2015.xlsx")
+candy_2016 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2016.xlsx")
+candy_2017 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx")
+```
+
+#cleaning the names and assigning to new variables
+```{r}
+candy_2015 <- clean_names(candy_2015)
+candy_2016 <- clean_names(candy_2016)
+candy_2017 <- clean_names(candy_2017)
+```
+
+
+
+#--------------------------
+
+#giving id to each DF, but maybe not needed?
+
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  mutate(id = 1:5630) %>% 
+  relocate("id", .before = 1)
+```
+#-------------------
+
+
+
+#renaming the age value so there's something to bind all three dfs to
+
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  rename(age = how_old_are_you)
+```
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(age = how_old_are_you)
+```
+
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  rename(age = q3_age)
+```
+
+
+#renaming the going out columns in 15/16
+
+
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  rename(going_out = are_you_going_actually_going_trick_or_treating_yourself)
+```
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(going_out = are_you_going_actually_going_trick_or_treating_yourself)
+```
+
+#comparing the column naems of dfs. really helpful to see what could be renamed to match
+```{r}
+compare_df_cols(candy_2015, candy_2016, candy_2017)
+```
+
+
+#renaming mary janes
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+rename(anonymous_brown_globs_that_come_in_black_and_orange_wrappers_a_k_a_mary_janes = anonymous_brown_globs_that_come_in_black_and_orange_wrappers)
+```
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+rename(anonymous_brown_globs_that_come_in_black_and_orange_wrappers_a_k_a_mary_janes = anonymous_brown_globs_that_come_in_black_and_orange_wrappers)
+```
+
+#renaming boxo raisins
+_________
+```{r
+candy_2017 <-
+candy_2017 %>% 
+  rename(box_o_raisins = boxo_raisins)
+```
+#mixed up after having to rerun chunks. Is above code necessary?
+
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  rename(box_o_raisins = boxo_raisins)
+```
+
+#renaming country and state
+
+
+#comparing the column naems of dfs. really helpful to see what could be renamed to match
+```{r}
+compare_df_cols(candy_2015, candy_2016, candy_2017)
+```
+
+```{r}
+candy_bind <-
+  bind_rows(candy_2015, candy_2016, candy_2017)
+```
+
+
+
+
+#How I'm going to clean the data:
+#1. Parse anything from the datasets that isn't pertinent to the subsequent analysis. This will involve parsing out the Degrees of Separation questions and the other random question
+#2. Pivot the DFs to longform, so that there is only one column for candy and one for the participant's rating
+#3. Change the column names that have corresponding data in other DFs, and clean up the values within them. Specifically Countries and States.
+#4. Merge the three DFs, 
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.4 Task 4 - Halloween Candy Data
+The data is in files boing-boing-candy-2015.xlxs, boing-boing-candy-2016.xlxs and boing-boing-candy-2017.xlxs. Bear in mind that this is trickier compared with tasks 1, 2 & 3.
+
+More information on this data is available here
+
+1.4.1 Some cleaning hints
+
+You’ll need to combine these three datasets together.
+The column country is particularly messy, you will likely need to do some ‘hard coding’ here!
+
+1.4.2 Analysis questions
+
+What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+What was the average age of people who are going out trick or treating and the average age of people 3. not going trick or treating?
+For each of joy, despair and meh, which candy bar revived the most of these ratings?
+How many people rated Starburst as despair?
+For the next three questions, count despair as -1, joy as +1 and meh as 0.
+
+What was the most popular candy bar by this rating system for each gender in the dataset?
+What was the most popular candy bar in each year?
+What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?
+
+
+
+
+
+
+
+
+
+
+
+
+
+#binding all three dfs for the first time
+#---------------
+```{r}
+bind_candy <- bind_rows(candy_2015, candy_2016, candy_2017)
+```
+#---------------
+
+
+
+```{r}
+candy_2016 %>% 
+  names()
+```
+
+
+
+
+```{r}
+candy_2017 %>% 
+  names()
+```
+
+
+```{r}
+candy_2017
+```
+
+
+```{r}
+names(candy_2017) <- sub("q1_", "", names(candy_2017))
+names(candy_2017) <- sub("q2_", "", names(candy_2017))
+names(candy_2017) <- sub("q3_", "", names(candy_2017))
+names(candy_2017) <- sub("q4_", "", names(candy_2017))
+names(candy_2017) <- sub("q5_", "", names(candy_2017))
+names(candy_2017) <- sub("q6_", "", names(candy_2017))
+names(candy_2017) <- sub("q7_", "", names(candy_2017))
+names(candy_2017) <- sub("q8_", "", names(candy_2017))
+names(candy_2017) <- sub("q9_", "", names(candy_2017))
+names(candy_2017) <- sub("q10_", "", names(candy_2017))
+names(candy_2017) <- sub("q11_", "", names(candy_2017))
+names(candy_2017) <- sub("q12_", "", names(candy_2017))
+names(candy_2017) <- sub("q13_", "", names(candy_2017))
+
+```
+
+```{r}
+candy_2017 %>% 
+  str_replace_all(sub
+```
+#figure out later
+
+
+
+
+
+
+
+
+```{r}
+candy_2017 %>% 
+  names()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

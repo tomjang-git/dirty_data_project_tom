@@ -1,0 +1,128 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+#extra code that I tried to tidy data with- use for reference in answering questions
+
+
+```{r}
+trial_3 <-
+candy_2015 %>% 
+  pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties", butterfinger, sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year, necco_wafers),
+               names_to = "candy",
+               values_to = "rating")
+```
+
+
+```{r}
+trial_2 <-
+trial %>% pivot_longer(cols = c("please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_bruce_lee"                     
+:"please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_beyonce_knowles", "please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_jk_rowling":"please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_francis_bacon_1561_1626"),
+               names_to = "degrees_of_separation",
+               values_to = "estimate")
+```
+
+```{r}
+trial_2 <- 
+ trial_2 %>%
+  mutate(degrees_of_separation
+         = str_replace_all(degrees_of_separation, "please_estimate_the_degree_s_of_separation_you_have_from_the_following_celebrities_", "")) %>% 
+  mutate(degrees_of_separation
+         = str_replace_all(degrees_of_separation, "please_estimate_the_degrees_of_separation_you_have_from_the_following_folks_", ""))
+```
+
+
+
+
+```{r}
+trial_1 %>% 
+  names()
+```
+
+
+```{r}
+trial_1 <-
+trial_1 %>% 
+  pivot_longer(cols = c("please_leave_any_remarks_or_comments_regarding_your_choices":"which_day_do_you_prefer_friday_or_sunday"),
+               names_to = "questions",
+               values_to = "answer")
+```
+
+
+  pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties", butterfinger, sea_salt_flavored_stuff_probably_chocolate_since_this_is_the_it_flavor_of_the_year, necco_wafers),
+               names_to = "candy",
+               values_to = "rating")
+
+```{r}
+trial_3 %>% 
+  t
+```
+
+
+
+```{r}
+trial <-
+trial %>% 
+  relocate("candy", .before = 5) %>% 
+  relocate("rating", .before = 6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
