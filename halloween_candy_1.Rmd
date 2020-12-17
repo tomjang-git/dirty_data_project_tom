@@ -10,6 +10,7 @@ output: html_notebook
 #4. Merge the three DFs.
 
 
+#loading packages
 
 ```{r}
 library(tidyverse)
@@ -24,8 +25,9 @@ library(janitor)
 ```
 
 ```{r}
-library(tidyr)
+library(naniar)
 ```
+
 
 #CLEANING
 
@@ -36,6 +38,7 @@ candy_2016 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-b
 candy_2017 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-boing-candy-2017.xlsx")
 ```
 
+
 #cleaning the names and assigning to new variables
 ```{r}
 candy_2015 <- clean_names(candy_2015)
@@ -44,10 +47,7 @@ candy_2017 <- clean_names(candy_2017)
 ```
 
 
-
-
 #giving year and id to each DF, but maybe not needed?
-
 
 #5630 obvs for 2015
 ```{r}
@@ -79,7 +79,8 @@ candy_2017 %>%
 ```
 
 
-#renaming the age value so there's something to bind all three dfs to
+
+#renaming the age column so there's something to bind all three dfs to
 
 ```{r}
 candy_2015 <-
@@ -124,17 +125,51 @@ candy_2016 %>%
   rename(country = which_country_do_you_live_in)
 ```
 
+#deselcting some non-candy columns from all years
 
 
 
+#getting rid of all non-candy items
+#2015
+```{r}
+candy_2015 <-
+candy_2015 %>% 
+  select(-cash_or_other_forms_of_legal_tender, -dental_paraphenalia, -generic_brand_acetaminophen, -glow_sticks, -broken_glow_stick, -creepy_religious_comics_chick_tracts, -healthy_fruit, -hugs_actual_physical_hugs, -kale_smoothie, -lapel_pins, -joy_joy_mit_iodine, -chick_o_sticks_we_don_t_know_what_that_is, -spotted_dick, peanut_butter_jars, -vicodin, -white_bread, -whole_wheat_anything)
+```
 
-#dropping rows if there is no candy or trick/treat information 
+#2016
+```{r}
+candy_2016 <-
+candy_2016 %>% 
+  select(-cash_or_other_forms_of_legal_tender, -dental_paraphenalia, -generic_brand_acetaminophen, -glow_sticks, -broken_glow_stick, -creepy_religious_comics_chick_tracts, -healthy_fruit, -hugs_actual_physical_hugs, -kale_smoothie, -joy_joy_mit_iodine, -chick_o_sticks_we_don_t_know_what_that_is, -spotted_dick, -vicodin, -white_bread, -whole_wheat_anything, -minibags_of_chips, -person_of_interest_season_3_dvd_box_set_not_including_disc_4_with_hilarious_outtakes, -chardonnay, -bonkers_the_board_game)
+
+```
 
 ```{r}
-#candy_2015 %>% 
-  #filter(!is.na(going_out) & !is.na(c(x100_grand_bar:york_peppermint_patties))
+candy_2017 %>% 
+  names()
 ```
-#what's wrong with this? Why does it work when I don't include the colon and following bit? Tried quotation marks, adding C to make it a vector, nothing. 
+
+
+
+#2017
+
+```{r}
+names(candy_2017) <- sub("q[0-9]_", "", names(candy_2017))
+names(candy_2017) <- sub("q1[0_9]_", "", names(candy_2017))
+```
+
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  rename(x100_grand_bar = "100_grand_bar")
+```
+
+```{r}
+candy_2017 <-
+candy_2017 %>% 
+  select(-cash_or_other_forms_of_legal_tender, -dental_paraphenalia, -generic_brand_acetaminophen, -glow_sticks, -broken_glow_stick, -creepy_religious_comics_chick_tracts, -healthy_fruit, -hugs_actual_physical_hugs, -kale_smoothie, -joy_joy_mit_iodine, -chick_o_sticks_we_don_t_know_what_that_is, -spotted_dick, -vicodin, -white_bread, -whole_wheat_anything, -minibags_of_chips, -chardonnay, -bonkers_the_board_game, -real_housewives_of_orange_county_season_9_blue_ray)
+```
 
 
 
@@ -166,13 +201,6 @@ candy_2015_long %>%
 #2015 looking ok for now. Onto 2016
 
 ```{r}
-candy_2016_long %>% 
-  names()
-```
-
-
-
-```{r}
 candy_2016_long <-
 candy_2016 %>% 
   pivot_longer(cols = c("x100_grand_bar":"york_peppermint_patties"),
@@ -182,16 +210,6 @@ candy_2016 %>%
 ```
 
 
-#need to figure out way to assign all of the specific items listed into the "CANDY" column and give them a value of JOY (and DESPAIR for the corresponding column)
-```{r}
-#candy_2016_long_trial <-
-#candy_2016_long %>% 
- # pivot_longer(cols = please_list_any_items_not_included_above_that_give_you_joy,
-      #         values_to = "candy")
-
-#And after sending the values to candy, automatically filling the rating column with "joy"
-```
-
 
 ```{r}
 candy_2016_long <-
@@ -199,40 +217,21 @@ candy_2016_long %>%
   select("id":"state_province_county_etc", candy, rating, year) %>% 
   relocate(year, id, age, your_gender, country, state_province_county_etc, candy, rating, going_out, timestamp)
 ```
+
+```{r}
+candy_2016_long %>% 
+  names()
+```
+
 #2016 looking ok. Need to figure out a way to assign specific items to JOY and DESPAIR columns. ASK INSTRUCTORS TMR
 #_______________________________________________________________________________-
 
-#find a better way of cleaning up the "Q" thing below
-
-```{r}
-names(candy_2017) <- sub("q1_", "", names(candy_2017))
-names(candy_2017) <- sub("q2_", "", names(candy_2017))
-names(candy_2017) <- sub("q3_", "", names(candy_2017))
-names(candy_2017) <- sub("q4_", "", names(candy_2017))
-names(candy_2017) <- sub("q5_", "", names(candy_2017))
-names(candy_2017) <- sub("q6_", "", names(candy_2017))
-names(candy_2017) <- sub("q7_", "", names(candy_2017))
-names(candy_2017) <- sub("q8_", "", names(candy_2017))
-names(candy_2017) <- sub("q9_", "", names(candy_2017))
-names(candy_2017) <- sub("q10_", "", names(candy_2017))
-names(candy_2017) <- sub("q11_", "", names(candy_2017))
-names(candy_2017) <- sub("q12_", "", names(candy_2017))
-names(candy_2017) <- sub("q13_", "", names(candy_2017))
-```
-
 
 #originally had letter q in front of it, now needs an x
-```{r}
-candy_2017 <-
-candy_2017 %>% 
-  rename(x100_grand_bar = "100_grand_bar")
-```
 
 
 
-
-
-
+#pivoting longer, because it looks similar enough to 
 ```{r}
 candy_2017_long <-
 candy_2017 %>% 
@@ -256,7 +255,13 @@ compare_df_cols(candy_2015_long, candy_2016_long, candy_2017_long)
 ```
 
 
+
+
+
 #all three DFs look ok for now. Time to bind them.
+
+
+
 
 ```{r}
 candy_bind <-
@@ -264,12 +269,15 @@ candy_bind <-
 candy_bind
 ```
 
+
+
+
 #get rid of rows that have no rating value and no going out value
 
 #originally tried this line of code but it cut out too much, removed all rows which had an NA value in going_out or rating. Logically the statement reads "show results if it is NOT the case that going_out is NA, and filter results if it is NOT the case that rating is NA. Many rows could have an NA value in one but not the other, and still get filtered out. This isn't what I want.
 ```{r}
-candy_bind %>% 
-  filter(!is.na(going_out) & !is.na(rating))
+#candy_bind %>% 
+#  filter(!is.na(going_out) & !is.na(rating))
 ```
 
 #this one reads "show results if it is NOT the case that BOTH going_out and rating are NA. There are fewer results where this is the case. 
@@ -281,18 +289,15 @@ candy_bind_filtered
 ```
 
 
-```{r}
-unique(candy_bind_filtered["candy"]) %>% 
-  order_by(as.character())
-```
 
 
 
-```{r}
-candy_bind_filtered %>%  
-  str_sub(
-    "mary_janes", "anonymous_brown_globs_that_come_in_black_and_orange_wrappers")
-```
+
+
+#candy_bind_filtered %>%  
+ # str_sub(
+  #  "mary_janes", "anonymous_brown_globs_that_come_in_black_and_orange_wrappers")
+
 
 
 
@@ -306,13 +311,7 @@ candy_bind_filtered %>%
 
 ```{r}
 candy_bind_filtered %>% 
-  count(is.na(rating))
-```
-#^^^rename values and column names and we're golden.
-
-```{r}
-candy_bind_filtered %>% 
-  count(is.na(rating))
+  count(NA_value_for_rating = is.na(rating))
 ```
 
 
@@ -323,58 +322,60 @@ candy_bind_filtered %>%
 #need to make sure there are no characters in the AGE column. And then one of the chunks directly below may work.
 
 
+#____________________________________________________________
+
+
 ```{r}
-candy_bind_filtered %>% 
+  candy_bind_filtered_age <-
+  candy_bind_filtered %>%
+  mutate(age = str_extract(age, "^[0-9]*+")) %>%
+  mutate(age =  as.numeric(age))
+
+  candy_bind_filtered_age %>% 
+  select(age, going_out) %>% 
+  filter(age <= 123 & age >= 3) %>% 
+  arrange(desc(age)) %>% 
   group_by(going_out) %>% 
   summarise(average_age = mean(age, na.rm = TRUE))
 ```
 
+
 ```{r}
-candy_bind_filtered %>% 
-  summarise(average_age_not = mean(agefilter(candy_bind_filtered, going_out == "Yes"), na.rm = TRUE))
+candy_bind_filtered_age_ex <-
+  candy_bind_filtered %>% 
+  mutate(age =  as.numeric(age))
+candy_bind_filtered_age_ex %>% 
+  select(age) %>% 
+  filter(age <= 123) %>% 
+  arrange(desc(age))
 ```
 
 ```{r}
-candy_bind_filtered %>% 
-  mean(filter(candy_bind_filtered, going_out == "Yes")$age, na.rm = TRUE)
-```
-
-```{r}
-candy_bind_filtered_age %>% 
-  filter(going_out == "Yes") %>% 
-  summarise(average_age = mean(age, na.rm = TRUE))
-```
-#______________________________________________________________________
-
-```{r}
-minmaxvector <- c(2, 120)
-```
-
-```{r}
-candy_bind_filtered_age <-
+  candy_bind_filtered_age <-
   candy_bind_filtered %>%
   mutate(age = str_extract(age, "^[0-9]*+")) %>% 
-    replace_with_na(replace = list(age = c(1880))
+  mutate(age =  as.numeric(age))
+
+candy_bind_filtered_age
+
+ 
 ```
 
-```{r}
-library(naniar)
-```
 
+
+  
 ```{r}
 candy_bind_filtered_age %>% 
-  distinct(age)
+  distinct(age) %>% 
+  arrange(age)
 ```
 
 
-```{r}
-  candy_bind_filtered %>%
 
-```
 
-```{r}
-candy_bind_filtered_age
-```
+
+
+
 
 
 ```{r}
@@ -407,36 +408,35 @@ candy_bind_filtered %>%
 
 
 
-```{r}
-candy_bind_filtered_age %>% 
-  distinct(candy)
-```
-
-
-```{r}
-candy_bind_filtered %>% 
-distinct(age)
-```
-
-
-names(candy_2017) <- sub("q1_", "", names(candy_2017))
-
-
-
-
-decathlon_clean %>% 
-  summarise(average_100_Decastar = mean(filter(decathlon_clean, competition == "Decastar")
-                                        $x100m, na.rm = TRUE)
 
 
 
 
 
 
-decathlon_clean %>% 
-  group_by(name) %>% 
-  summarise(overall_points = (sum(points))) %>% 
-  arrange(desc(overall_points)) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
