@@ -17,6 +17,10 @@ library(tidyverse)
 ```
 
 ```{r}
+library(dplyr)
+```
+
+```{r}
 library(readxl)
 ```
 
@@ -39,7 +43,7 @@ candy_2017 <- read_excel("dirty_data_project_raw_data/candy_ranking_data/boing-b
 ```
 
 
-#cleaning the names and assigning to new variables
+#cleaning the names 
 ```{r}
 candy_2015 <- clean_names(candy_2015)
 candy_2016 <- clean_names(candy_2016)
@@ -47,7 +51,7 @@ candy_2017 <- clean_names(candy_2017)
 ```
 
 
-#giving year and id to each DF, but maybe not needed?
+#giving year and id columns to each to each DF
 
 #5630 obvs for 2015
 ```{r}
@@ -101,8 +105,11 @@ candy_2017 %>%
 ```
 
 
-#renaming the going out columns in 15/16
+#Examined DFs in relation to questions, decided on columns that are necessary for the analysis: CANDY    YEAR    AGE   GOING OUT   GENDER    COUNTRY
 
+
+
+#renaming the going out columns in 15/16
 
 ```{r}
 candy_2015 <-
@@ -121,23 +128,21 @@ candy_2016 %>%
 ```{r}
 candy_2016 <-
 candy_2016 %>% 
-  rename(state_province_county_etc = which_state_province_county_do_you_live_in) %>% 
   rename(country = which_country_do_you_live_in)
 ```
 
-#deselcting some non-candy columns from all years
-
-
+#deselcting some non-candy item columns from all years
 
 #getting rid of all non-candy items
-#2015
+
+#for 2015
 ```{r}
 candy_2015 <-
 candy_2015 %>% 
   select(-cash_or_other_forms_of_legal_tender, -dental_paraphenalia, -generic_brand_acetaminophen, -glow_sticks, -broken_glow_stick, -creepy_religious_comics_chick_tracts, -healthy_fruit, -hugs_actual_physical_hugs, -kale_smoothie, -lapel_pins, -joy_joy_mit_iodine, -chick_o_sticks_we_don_t_know_what_that_is, -spotted_dick, peanut_butter_jars, -vicodin, -white_bread, -whole_wheat_anything)
 ```
 
-#2016
+#for 2016
 ```{r}
 candy_2016 <-
 candy_2016 %>% 
@@ -145,26 +150,22 @@ candy_2016 %>%
 
 ```
 
-```{r}
-candy_2017 %>% 
-  names()
-```
+#for 2017
 
-
-
-#2017
-
+#removing all of the unnecessary Qs
 ```{r}
 names(candy_2017) <- sub("q[0-9]_", "", names(candy_2017))
 names(candy_2017) <- sub("q1[0_9]_", "", names(candy_2017))
 ```
 
+#renaming this one because it had a "Q6" in front of it. Better to have column names that don't begin with a letter.
 ```{r}
 candy_2017 <-
 candy_2017 %>% 
   rename(x100_grand_bar = "100_grand_bar")
 ```
 
+#and the removing non-candy items, just like for other two years
 ```{r}
 candy_2017 <-
 candy_2017 %>% 
@@ -172,12 +173,10 @@ candy_2017 %>%
 ```
 
 
-
-#necessary for the analysis: CANDY    YEAR    AGE   TRICK OR TREATING   GENDER    COUNTRY
-#kill everything else
+#turning candy into observations, instead of each candy having one column each. Using pivot longer to do this.
 
 
-#pivoting 2015, rearranging  position of columns
+#pivoting 2015, rearranging position of columns
 ```{r}
 candy_2015_long <-
 candy_2015 %>% 
@@ -186,20 +185,17 @@ candy_2015 %>%
                values_to = "rating")
 ```
 
-```{r}
-candy_2015_long %>% 
-  names()
-```
-
+#choosing the columns from before that I figured were necessary for the analysis.
 ```{r}
 candy_2015_long <-
 candy_2015_long %>% 
   select("id":"going_out", candy, rating, year) %>% 
   relocate(year, id, age, candy, rating, going_out, timestamp)
+candy_2015_long
 ```
-
 #2015 looking ok for now. Onto 2016
 
+#same process, pivot longer
 ```{r}
 candy_2016_long <-
 candy_2016 %>% 
@@ -210,7 +206,7 @@ candy_2016 %>%
 ```
 
 
-
+#and then choose necessary columns
 ```{r}
 candy_2016_long <-
 candy_2016_long %>% 
@@ -218,20 +214,10 @@ candy_2016_long %>%
   relocate(year, id, age, your_gender, country, state_province_county_etc, candy, rating, going_out, timestamp)
 ```
 
-```{r}
-candy_2016_long %>% 
-  names()
-```
-
 #2016 looking ok. Need to figure out a way to assign specific items to JOY and DESPAIR columns. ASK INSTRUCTORS TMR
 #_______________________________________________________________________________-
 
-
-#originally had letter q in front of it, now needs an x
-
-
-
-#pivoting longer, because it looks similar enough to 
+#and same for 2017 as other two
 ```{r}
 candy_2017_long <-
 candy_2017 %>% 
@@ -249,26 +235,17 @@ candy_2017_long %>%
   relocate(year, id, age, gender, country, state_province_county_etc, candy, rating, going_out)
 ```
 
-
+#comparing columns of the three dfs, seeing if they look ready to bind into one.
 ```{r}
 compare_df_cols(candy_2015_long, candy_2016_long, candy_2017_long)
 ```
 
-
-
-
-
-#all three DFs look ok for now. Time to bind them.
-
-
-
-
+#all three DFs look ok. Time to bind them.
 ```{r}
 candy_bind <-
   bind_rows(candy_2015_long, candy_2016_long, candy_2017_long)
 candy_bind
 ```
-
 
 
 
@@ -290,40 +267,34 @@ candy_bind_filtered
 
 
 
-
-
-
-
-#candy_bind_filtered %>%  
- # str_sub(
-  #  "mary_janes", "anonymous_brown_globs_that_come_in_black_and_orange_wrappers")
-
-
-
-
-
 #QUESTIONS
 
 
 #1.4.2.1
 #What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
 
-
 ```{r}
-candy_bind_filtered %>% 
+candy_bind_filtered %>%
   count(NA_value_for_rating = is.na(rating))
+
+candy_bind_filtered %>% 
+count(rating)
+  
 ```
+#the code has returned FALSE to is.na for 637584 values. Second bit of the code shows that there are only three non-NA values, of DESPAIR, JOY, and MEH, so no other weird non-answers.
+
+#____________________________________________________________
+
 
 
 
 
 #1.4.2.2
 
-#need to make sure there are no characters in the AGE column. And then one of the chunks directly below may work.
 
+#First I'm extracting only numeric values from the age column- there were a couple of values in there that looked really messy, a jumble of letters and numbers. Then I'm changing the age column type to numeric.
 
-#____________________________________________________________
-
+#In the second part only age and going_out columns are selected, because they're the ones up for analysis. Then, filtering out the ridiculous numbers, an age range has been set from 3 (when it might be reasonable to start answering telephones) to 122 (the oldest living person). Arrange, group, summarise mean.
 
 ```{r}
   candy_bind_filtered_age <-
@@ -333,165 +304,134 @@ candy_bind_filtered %>%
 
   candy_bind_filtered_age %>% 
   select(age, going_out) %>% 
-  filter(age <= 123 & age >= 3) %>% 
+  filter(age <= 122 & age >= 3) %>% 
   arrange(desc(age)) %>% 
   group_by(going_out) %>% 
   summarise(average_age = mean(age, na.rm = TRUE))
 ```
 
 
-```{r}
-candy_bind_filtered_age_ex <-
-  candy_bind_filtered %>% 
-  mutate(age =  as.numeric(age))
-candy_bind_filtered_age_ex %>% 
-  select(age) %>% 
-  filter(age <= 123) %>% 
-  arrange(desc(age))
-```
+#1.4.2.3
+
+#ordered and then assigned to new variable. Filtered out each rating value within that new variable, because there were only three.
+
 
 ```{r}
-  candy_bind_filtered_age <-
-  candy_bind_filtered %>%
-  mutate(age = str_extract(age, "^[0-9]*+")) %>% 
-  mutate(age =  as.numeric(age))
-
-candy_bind_filtered_age
-
- 
-```
-
-
-
+candy_bind_rating_count <-
+candy_bind_filtered_age %>% 
+  group_by(candy) %>% 
+  count(rating) %>% 
+  arrange(desc(n))
   
+  candy_bind_rating_count %>% 
+  filter(rating == "JOY") %>% 
+    head(1)
+
+  candy_bind_rating_count %>% 
+  filter(rating == "DESPAIR") %>% 
+    head(1)
+
+  candy_bind_rating_count %>% 
+  filter(rating == "MEH") %>% 
+    head(1)
+
+```
+
+
+#1.4.2.4
+
 ```{r}
 candy_bind_filtered_age %>% 
-  distinct(age) %>% 
-  arrange(age)
+  group_by(candy) %>% 
+  count(rating) %>% 
+  filter(candy == "starburst") %>% 
+  filter(rating == "DESPAIR")
 ```
 
+#1.4.2.6
 
-
-
-
-
-
-
+#First, I'm using case_when to create a new column where each of the ratings has a numeric equivalent. Using the same filter for age (between 3 and 122). Assigning all of this to a new variable for shorthand.
 
 ```{r}
-candy_bind_filtered_age %>% 
-  distinct(age)
+candy_bind_rating_points <-
+candy_bind_filtered_age_ex %>% 
+mutate(rating_points = case_when(
+  rating == "DESPAIR" ~ -1,
+  rating == "JOY" ~ 1,
+  rating == "MEH" ~ 0
+  )) %>% 
+  filter(age <= 122 & age >= 3)
+candy_bind_rating_points
 ```
 
 
-yyz$b <- as.numeric(as.character(yyz$b))
+#Then using new variable to run 4 variants of the same code chunk, for each of the 4 gender responses that wasn't NA. I'm filtering out by the gender response, grouping by candy, creating a new column with the sumrs of the ratings and taking the top value. 
+
+#for all four chunks the result shows that any full sized candy bar is the most highly rated candy bar. In second place, male and female respondents both rated reese's peanut butter cups most highly, but those who didn't leave their gender rated kit kats and those with gender "other" rated twix.
 
 ```{r}
-candy_bind_filtered_age$age <-
-  as.numeric(as.character(candy_bind_filtered_age$age))
+candy_bind_rating_points %>% 
+  filter(gender == "Male") %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_male = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_male)) %>% 
+  head(2)
+
+candy_bind_rating_points %>% 
+  filter(gender == "Female") %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_female = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_female)) %>% 
+  head(2)
+
+candy_bind_rating_points %>% 
+  filter(gender == "I'd rather not say") %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_rather_not_say = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_rather_not_say)) %>% 
+  head(2)
+
+candy_bind_rating_points %>% 
+  filter(gender == "Other") %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_other = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_other)) %>% 
+  head(2)
 ```
 
 
 
+
+#1.4.2.7
+
+#effectively reworked the same chunk of code for question 6, except for year. Once again, any full sized candy bar was the most highly rated across the board.
 
 ```{r}
-candy_bind_filtered_age <-
-candy_bind_filtered %>% 
-  mutate(age = str_sub(age, "a-z"))
+candy_bind_rating_points %>% 
+  filter(year == 2015) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_2015 = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_2015)) %>% 
+  head(1)
+
+candy_bind_rating_points %>% 
+  filter(year == 2016) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_2016 = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_2016)) %>% 
+  head(1)
+
+candy_bind_rating_points %>% 
+  filter(year == 2017) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_2017 = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_2017)) %>% 
+  head(1)
+
 ```
 
 
-```{r}
-(candy_bind_filtered) <- str_sub("a", "", names(candy_bind_filtered))
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#can I find a way to get rid of rows with all NAs for candy before pivoting it longer
-
-
-
-
-
-
-
-
-1.4 Task 4 - Halloween Candy Data
-The data is in files boing-boing-candy-2015.xlxs, boing-boing-candy-2016.xlxs and boing-boing-candy-2017.xlxs. Bear in mind that this is trickier compared with tasks 1, 2 & 3.
-
-More information on this data is available here
-
-1.4.1 Some cleaning hints
-
-You’ll need to combine these three datasets together.
-The column country is particularly messy, you will likely need to do some ‘hard coding’ here!
-
-1.4.2 Analysis questions
-
-What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
-What was the average age of people who are going out trick or treating and the average age of people 3. not going trick or treating?
-For each of joy, despair and meh, which candy bar revived the most of these ratings?
-How many people rated Starburst as despair?
-For the next three questions, count despair as -1, joy as +1 and meh as 0.
-
-What was the most popular candy bar by this rating system for each gender in the dataset?
-What was the most popular candy bar in each year?
-What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?
-
-
-
-
+#various attempts at question 8 are in halloween_candy, line 272.
 
 
 

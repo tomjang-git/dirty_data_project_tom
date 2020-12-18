@@ -135,7 +135,7 @@ candy_bind <-
   bind_rows(candy_2015, candy_2016, candy_2017)
 ```
 
-
+  
 
 
 #How I'm going to clean the data:
@@ -143,6 +143,16 @@ candy_bind <-
 #2. Pivot the DFs to longform, so that there is only one column for candy and one for the participant's rating
 #3. Change the column names that have corresponding data in other DFs, and clean up the values within them. Specifically Countries and States.
 #4. Merge the three DFs, 
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -259,6 +269,19 @@ candy_2017 %>%
 
 
 
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
 
 
 
@@ -267,13 +290,24 @@ candy_2017 %>%
 
 
 
+#1.4.2.8
 
 
+```{r}
+candy_bind_rating_points %>% 
+  distinct(country) %>% 
+  arrange(country)
 
+```
 
 
 
 
+decathlon_clean %>% 
+  group_by(name) %>% 
+  summarise(overall_points = (sum(points))) %>% 
+  arrange(desc(overall_points)) %>% 
+  head(1)
 
 
 
@@ -282,7 +316,23 @@ candy_2017 %>%
 
 
 
+```{r}
+candy_bind_rating_points %>% 
+  count(candy) %>% 
+  group_by(rating_points) %>% 
+  summarise(candy_points = (sum(rating_points))) %>% 
+  arrange(desc(candy_points)) %>% 
+  filter(your_gender == "Male")
+  
+```
 
+```{r}
+decathlon_clean %>% 
+  group_by(name) %>% 
+  summarise(overall_points = (sum(points))) %>% 
+  arrange(desc(overall_points)) %>% 
+  head(1)
+```
 
 
 
@@ -297,8 +347,11 @@ candy_2017 %>%
 
 
 
+case when 
 
+repoed
 
+if else
 
 
 
@@ -310,21 +363,60 @@ candy_2017 %>%
 
 
 
+```{r}
+candy_bind_rating_points %>% 
+  distinct(country) %>% 
+  arrange(country)
+```
+bad_america
+```{r}
+bad_america <- c("'merica", "america", "America", "EUA", "I pretend to be from Canada, but I am really from the United States.", "Merica", "Murica", "New Jersey", "New York", "North Carolina", "Pittsburgh", "the best one - usa", "The United States", "The United States of America", "The Yoo Ess of Aaayyyyyy", "Trumpistan", "U S", "u s a", "u.s.", "U.s.", "U.S.", "u.s.a.", "U.S.A.", "Unied States", "unite states", "United Sates", "United staes", "United State", "United Statea", "United Stated", "united states", "united States", "United states", "United States", "UNited States", "united states of america", "United States of America", "United Statss", "United Stetes", "united ststes", "Unites States", "Units States", "us", "Us", "US of A", "usa", "uSA", "Usa", "USa", "USA", "USA USA USA", "USA USA USA USA", "USA USA USA!!!!", "USA!", "USA! USA!", "USA! USA! USA!", "USA!!!!!!", "USA? Hard to tell anymore..", "USAA", "usas", "USAUSAUSA", "USSA")
+```
+Leaving out US
 
+```{r}
+bad_america
+```
 
 
+```{r}
+candy_bind_rating_points %>% 
+  mutate(countries = (bad_america %in% country ~ "US")) %>% 
+  distinct(countries) %>% 
+  arrange(countries)
+```
 
+```{r}
+candy_bind_rating_points %>% 
+  mutate(countries = str_replace(country, bad_america, "US")
+         )
+```
 
 
 
+```{r}
+candy_bind_rating_points <-
+candy_bind_filtered_age_ex %>% 
+mutate(rating_points = case_when(
+  rating == "DESPAIR" ~ -1,
+  rating == "JOY" ~ 1,
+  rating == "MEH" ~ 0
+  )) %>% 
+  filter(age < 124 & age > 3)
+candy_bind_rating_points
+```
 
 
 
 
 
+case when
 
+list of all of the dodgy versions, separate all dodgy names into new vector
 
+%in%
 
+only need to clean countries that do analysis
 
 
 
@@ -340,6 +432,7 @@ candy_2017 %>%
 
 
 
+#can I find a way to get rid of rows with all NAs for candy before pivoting it longer
 
 
 
@@ -348,60 +441,27 @@ candy_2017 %>%
 
 
 
+1.4 Task 4 - Halloween Candy Data
+The data is in files boing-boing-candy-2015.xlxs, boing-boing-candy-2016.xlxs and boing-boing-candy-2017.xlxs. Bear in mind that this is trickier compared with tasks 1, 2 & 3.
 
+More information on this data is available here
 
+1.4.1 Some cleaning hints
 
+You’ll need to combine these three datasets together.
+The column country is particularly messy, you will likely need to do some ‘hard coding’ here!
 
+1.4.2 Analysis questions
 
+What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+What was the average age of people who are going out trick or treating and the average age of people 3. not going trick or treating?
+For each of joy, despair and meh, which candy bar revived the most of these ratings?
+How many people rated Starburst as despair?
+For the next three questions, count despair as -1, joy as +1 and meh as 0.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+What was the most popular candy bar by this rating system for each gender in the dataset?
+What was the most popular candy bar in each year?
+What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?
 
 
 
