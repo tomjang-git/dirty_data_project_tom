@@ -210,8 +210,8 @@ candy_2016 %>%
 ```{r}
 candy_2016_long <-
 candy_2016_long %>% 
-  select("id":"state_province_county_etc", candy, rating, year) %>% 
-  relocate(year, id, age, your_gender, country, state_province_county_etc, candy, rating, going_out, timestamp)
+  select("id":"country", candy, rating, year) %>% 
+  relocate(year, id, age, your_gender, country, candy, rating, going_out, timestamp)
 ```
 
 #2016 looking ok. Need to figure out a way to assign specific items to JOY and DESPAIR columns. ASK INSTRUCTORS TMR
@@ -231,8 +231,8 @@ candy_2017 %>%
 ```{r}
 candy_2017_long <-
 candy_2017_long %>% 
-  select("id":"state_province_county_etc", candy, rating, year) %>% 
-  relocate(year, id, age, gender, country, state_province_county_etc, candy, rating, going_out)
+  select("id":"country", candy, rating, year) %>% 
+  relocate(year, id, age, gender, country, candy, rating, going_out)
 ```
 
 #comparing columns of the three dfs, seeing if they look ready to bind into one.
