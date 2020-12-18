@@ -431,7 +431,83 @@ candy_bind_rating_points %>%
 ```
 
 
-#various attempts at question 8 are in halloween_candy, line 272.
+#Question 8 attempt
+
+
+```{r}
+bad_america <- c("'merica", "america", "America", "EUA", "I pretend to be from Canada, but I am really from the United States.", "Merica", "Murica", "New Jersey", "New York", "North Carolina", "Pittsburgh", "the best one - usa", "The United States", "The United States of America", "The Yoo Ess of Aaayyyyyy", "Trumpistan", "U S", "u s a", "u.s.", "U.s.", "U.S.", "u.s.a.", "U.S.A.", "Unied States", "unite states", "United Sates", "United staes", "United State", "United Statea", "United Stated", "united states", "united States", "United states", "United States", "UNited States", "united states of america", "United States of America", "United Statss", "United Stetes", "united ststes", "Unites States", "Units States", "us", "Us", "US of A", "usa", "uSA", "Usa", "USa", "USA", "USA USA USA", "USA USA USA USA", "USA USA USA!!!!", "USA!", "USA! USA!", "USA! USA! USA!", "USA!!!!!!", "USA? Hard to tell anymore..", "USAA", "usas", "USAUSAUSA", "USSA")
+```
+Leaving out US
+
+```{r}
+bad_britain <- c("england", "uk", "United Kingdom", "England", "United Kindom", "U.K.", "Uk", "Scotland", "endland")
+```
+Leaving out UK
+
+
+```{r}
+bad_canada <- c("canada", "Can", "Canada`", "CANADA")
+```
+Leaving out Canada
+
+
+
+```{r}
+candy_bind_rating_points %>% 
+  mutate(country = (bad_america %in% country ~ "US",
+                      bad_britain %in% country ~ "UK",
+                      bad_canada %in% country ~ "Canada")) %>% 
+  distinct(countries) %>% 
+  arrange(countries)
+```
+
+
+#what i can do for now. The idea is to replace the vectors with the country names once I can remove all the bad names.
+```{r}
+candy_bind_rating_points %>% 
+  filter(country %in% bad_america) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_US = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_US)) %>% 
+  head(1)
+
+
+candy_bind_rating_points %>% 
+  filter(country %in% bad_britain) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_UK = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_UK)) %>% 
+  head(1)
+
+
+candy_bind_rating_points %>% 
+  filter(country %in% bad_canada) %>% 
+  group_by(candy) %>% 
+  summarise(candy_points_Canada = (sum(rating_points, na.rm = TRUE))) %>% 
+  arrange(desc(candy_points_Canada)) %>% 
+  head(1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
